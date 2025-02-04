@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO list (con web service)</title>
+    <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+    <script src="js/bootstrap.js" type="text/javascript"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>TODO list (con web service)</h1>
+    </div>
+    
+    <form class="container">
+        <div class="row">
+            <div class="col">
+                <input type="text" id="todo" class="form-control" placeholder="Inserisci attività">
+            </div>
+            <div class="col">
+                <button type="button" id="add" class="btn btn-primary">Aggiungi</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="container">
+        <table id="activities" class="table">
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
