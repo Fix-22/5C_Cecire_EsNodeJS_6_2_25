@@ -1,0 +1,20 @@
+{
+  "name": "5c_cecire_filesnodejs",
+  "version": "0.1.0",
+  "description": "files e nodejs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "files"
+  ],
+  "author": "Simone Cecire",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "bootstrap": "^5.3.3",
+    "express": "^4.21.2",
+    "http": "^0.0.1-security"
+  }
+}
