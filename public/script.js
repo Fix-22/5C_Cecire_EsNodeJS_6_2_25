@@ -1,5 +1,5 @@
 /*
-    TODO list (front-end) - Cecire
+    TODO list database (front-end) - Cecire
 */
 
 const todoInput = document.getElementById("todo");
@@ -81,7 +81,7 @@ const renderTodos = () => { // funzione per fare il render dei todo
     buttons.forEach((button) => {
         if (button.id.includes("done")) { // se l'id del pulsante inizia con "done"
             button.onclick = () => { // aggiunge una funzione handler che setta il parametro "done" dell'attività nell'array coi todo a true, fa di nuovo la render e carica sul server le todo aggiornate
-                const todo = todos.find((e) => e.id === button.id.replace("done_", ""));
+                const todo = todos.find((e) => e.id === parseInt(button.id.replace("done_", "")));
                 changeTodoState(todo).then(() => loadTodos()).then(data => {
                     todos = data.todos;
                     renderTodos();

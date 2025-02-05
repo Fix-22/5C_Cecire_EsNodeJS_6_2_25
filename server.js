@@ -10,6 +10,7 @@ const fs = require('fs');
 const mysql = require('mysql2');
 
 const conf = JSON.parse(fs.readFileSync('conf.json'));
+conf.ssl.ca = fs.readFileSync(__dirname + "/ca.pem");
 const connection = mysql.createConnection(conf);
 
 const executeQuery = (sql) => {
@@ -18,8 +19,7 @@ const executeQuery = (sql) => {
            if (err) {
               console.error(err);
               reject();     
-           }   
-           console.log('done');
+           }
            resolve(result);         
      });
   })
@@ -27,37 +27,43 @@ const executeQuery = (sql) => {
 
 const createTable = () => {
   return executeQuery(`
-  CREATE TABLE IF NOT EXISTS todos
+  CREATE TABLE IF NOT EXISTS todo
      ( id INT PRIMARY KEY AUTO_INCREMENT, 
-        name VARCHAR(255) NOT NULL, 
+        task VARCHAR(255) NOT NULL, 
         done BOOLEAN ) 
      `);      
 };
 
 const insert = (todo) => {
   const template = `
-  INSERT INTO todos (name, done) VALUES ('$NAME', '$DONE')
+  INSERT INTO todo (task, done) VALUES ('$TASK', '$DONE')
      `;
-  let sql = template.replace("$NAME", todo.name).replace("$DONE", todo.completed);
+  let sql = template.replace("$TASK", todo.task).replace("$DONE", todo.done);
   return executeQuery(sql); 
 };
 
 const select = () => {
   const sql = `
-  SELECT id, name, done FROM todos
+  SELECT id, task, done FROM todo
      `;
   return executeQuery(sql); 
 };
 
-createTable().then(() => {
-  insert({name: "test " + new Date().getTime(), completed: false}).then((result) => {
-     select().then(console.log);
-  });
-});
+const update = (todo) => {
+  const template = `
+  UPDATE todo
+  SET done=$DONE
+  WHERE id=$ID;
+     `;
+  let sql = template.replace("$ID", todo.id).replace("$DONE", todo.done);
+  return executeQuery(sql); 
+}
+
+const deleteTodo = (id) => {
+  return executeQuery("DELETE FROM todo WHERE id=" + id + ";")
+}
 
 const app = express();
-
-let todos = [];
 
 app.use(bodyParser.json());
 
@@ -73,37 +79,30 @@ app.use("/", express.static(path.join(__dirname, "public")));
 
 app.post("/todo/add", (req, res) => {
   const todo = req.body;
-  todo.id = "" + new Date().getTime();
-  todos.push(todo);
+  todo.done = Number(todo.done);
 
-  res.json({result: "Ok"});
+  insert(todo).then(() => {
+    res.json({result: "Ok"});
+  });
 });
 
 app.get("/todo", (req, res) => {
-  res.json({todos: todos});
+  select().then(todos => res.json({todos: todos}));
 });
 
 app.put("/todo/change", (req, res) => { // cambia lo stato nel caso si volgia riassegnare l'attività
   const todo = req.body;
+  todo.done = Number(!Boolean(todo.done));
 
-  try {
-    todos.forEach((element) => {
-      if (element.id === todo.id) {
-        element.done = !element.done;
-      }
-    });
-  }
-  catch (e) {
-    console.log(e);
-  }
-
-  res.json({result: "Ok"});
+  update(todo).then(() => {
+    res.json({result: "Ok"});
+  });
 });
 
 app.delete("/todo/:id", (req, res) => {
-  todos = todos.filter((element) => element.id !== req.params.id);
-
-  res.json({result: "Ok"});  
+  deleteTodo(req.params.id).then(() => {
+    res.json({result: "Ok"});
+  });
 });
 
 const server = http.createServer(app);
